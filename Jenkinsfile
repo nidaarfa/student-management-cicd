@@ -28,7 +28,10 @@ pipeline {
                 bat '''
                     if exist release rmdir /s /q release
                     mkdir release
-                    xcopy /E /I /Y . release\\app /EXCLUDE:.gitignore
+                    mkdir release\\app
+                    copy app.py release\\app\\
+                    copy test_app.py release\\app\\
+                    copy requirements.txt release\\app\\
                     powershell Compress-Archive -Path release\\app\\* -DestinationPath release\\student-management.zip -Force
                 '''
                 archiveArtifacts artifacts: 'release/*.zip', fingerprint: true
