@@ -4,6 +4,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 bat '''
+                    if exist release rmdir /s /q release
+                    if exist .pytest_cache rmdir /s /q .pytest_cache
+                    for /d /r %%d in (__pycache__) do @if exist "%%d" rmdir /s /q "%%d"
                     python -m venv .venv
                     .venv\\Scripts\\python.exe -m pip install -r requirements.txt
                 '''
