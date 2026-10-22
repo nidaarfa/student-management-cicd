@@ -1,37 +1,38 @@
-﻿pipeline {
+pipeline {
     agent any
     stages {
         stage('Install Dependencies') {
             steps {
                 bat '''
-                python -m venv .venv
-                .venv\\Scripts\\python.exe -m pip install -r requirements.txt
+                    python -m venv .venv
+                    .venv\\Scripts\\python.exe -m pip install -r requirements.txt
                 '''
             }
         }
         stage('Test') {
             steps {
-                bat '.venv\\Scripts\\python.exe -m pytest -v'
+                bat '''
+                    .venv\\Scripts\\python.exe -m pytest -v
+                '''
             }
         }
         stage('Run Application') {
             steps {
-                bat '.venv\\Scripts\\python.exe app.py'
+                bat '''
+                    .venv\\Scripts\\python.exe app.py
+                '''
             }
         }
         stage('Package Release') {
             steps {
                 bat '''
-                if not exist release mkdir release
-                copy /Y app.py release\\app.py
-                copy /Y requirements.txt release\\requirements.txt
+                    if exist release rmdir /s /q release
+                    mkdir release
+                    xcopy /E /I /Y . release\\app /EXCLUDE:.gitignore
+                    powershell Compress-Archive -Path release\\app\\* -DestinationPath release\\student-management.zip -Force
                 '''
-                archiveArtifacts artifacts: 'release/**', fingerprint: true
+                archiveArtifacts artifacts: 'release/*.zip', fingerprint: true
             }
         }
-    }
-    post {
-        success { echo 'SUCCESS: All stages completed.' }
-        failure { echo 'FAILED: Check Console Output.' }
     }
 }
